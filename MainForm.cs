@@ -18,7 +18,6 @@ namespace Wellbeing
         private const byte DefaultMaxTimeMins = 240;
         private const byte DefaultIdleThresholdMins = 6;
         private const string DateTimeFormatter = "G";
-        private const string DefaultPassword = "17861177";
         
         private readonly ResetChecker ResetChecker;
         private readonly UpdateChecker UpdateChecker;
@@ -64,7 +63,7 @@ namespace Wellbeing
             int resetHour = Config.GetIntOrNull(Config.Property.ResetHour) ?? DefaultResetHour;
             ResetChecker = new(resetHour, lastOpen);
             
-            Password = Config.GetValueOrNull(Config.Property.Password) ?? DefaultPassword;
+            Password = Config.GetValueOrNull(Config.Property.Password) ?? Properties.Settings.Default.DefaultPassword;
             UpdateChecker = new();
             PcLocker = new(this);
 
