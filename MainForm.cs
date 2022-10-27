@@ -57,7 +57,7 @@ namespace Wellbeing
             resources.ApplyResources(this, "$this");
 
             InitializeComponent();
-            SetButtonListeners();
+
             versionLbl.Text = Program.Version;
 
             DateTime lastOpen = Config.GetDateTime(Config.Property.LastOpenOrResetDateTime, DateTimeFormatter) ?? DateTime.MinValue;
@@ -188,90 +188,6 @@ namespace Wellbeing
                 Location = Location with { Y = 0 };
         }
 
-        private void SetButtonListeners()
-        {
-            CloseButt.Click += (_, _) =>
-            {
-                if (RequestPassword())
-                    Application.Exit();
-            };
-
-            ChangeIdleTimeButt.Click += (_, _) =>
-            {
-                TimeSpan currTime = PassedTimeWatcher.IdleThreshold;
-                TimeSpan? time = ObtainTimeOrNull(currTime);
-                if (time is not null && RequestPassword())
-                {
-                    PassedTimeWatcher.IdleThreshold = time.Value;
-                    Config.SetValue(Config.Property.IdleThresholdMins, (int)time.Value.TotalMinutes);
-                }
-            };
-
-            ChangeResetHourButt.Click += (_, _) =>
-            {
-                TimeSpan currHour = TimeSpan.FromHours(ResetChecker.ResetHour);
-                TimeSpan? hour = ObtainTimeOrNull(currHour);
-                if (!hour.HasValue || hour == currHour || !RequestPassword())
-                    return;
-                
-                ResetChecker.ResetHour = (byte)hour.Value.Hours;
-                Config.SetValue(Config.Property.ResetHour, hour.Value.Hours);
-            };
-
-            ToggleButt.Click += (_, _) =>
-            {
-                if (!RequestPassword())
-                    return;
-
-                PassedTimeWatcher.Running = !PassedTimeWatcher.Running;
-            };
-
-            ChangePassedButt.Click += (_, _) =>
-            {
-                TimeSpan? time = ObtainTimeOrNull(TimeSpan.FromMilliseconds(PassedTimeWatcher.PassedMillis));
-                if (!time.HasValue || !RequestPassword())
-                    return;
-                
-                PassedTimeWatcher.PassedMillis = (int)time.Value.TotalMilliseconds;
-                if (PassedTimeWatcher.PassedMillis < PassedTimeWatcher.MaxTime.TotalMilliseconds)
-                    UnlockIfLocked();
-            };
-
-            ChangeMaxButt.Click += (_, _) =>
-            {
-                TimeSpan? time = ObtainTimeOrNull(PassedTimeWatcher.MaxTime);
-                
-                if (!time.HasValue || !RequestPassword())
-                    return;
-                
-                Config.SetValue(Config.Property.MaxTimeMins, (int)time.Value.TotalMinutes);
-                PassedTimeWatcher.MaxTime = time.Value;
-                
-                if (PassedTimeWatcher.PassedMillis < PassedTimeWatcher.MaxTime.TotalMilliseconds)
-                    UnlockIfLocked();
-            };
-
-            ChangePasswordButt.Click += (_, _) =>
-            {
-                string? newPassword = ObtainTextOrNull(Properties.Resources.NewPassword, true);
-                
-                if (newPassword is null || !RequestPassword())
-                    return;
-                
-                Config.SetValue(Config.Property.Password, newPassword);
-                Password = newPassword;
-            };
-
-
-
-            DumpButt.Click += (_, _) =>
-            {
-                Logger.Log($"DUMP:\n" +
-                           $"  Idle time during sleep: {Utils.FormatTime(PassedTimeWatcher.IdleMillisDuringSleep)}\n" +
-                           $"  Last idle time: {Utils.FormatTime(PassedTimeWatcher.LastIdleTimeMillis)}\n");
-            };
-
-        }
 
         private bool RequestPassword() => ObtainTextOrNull(Properties.Resources.Password, true) == Password;
         private static string? ObtainTextOrNull(string title, bool password)
@@ -351,6 +267,124 @@ namespace Wellbeing
             }
 
             base.Dispose(disposing);
+        }
+
+        
+
+        private void MainForm_Load(object sender, EventArgs e)
+        {
+
+        }
+
+        private void AppButt_Click(object sender, EventArgs e)
+        {
+#if !DEBUG
+                if (!RequestPassword())
+                    return;
+#endif
+            Process.Start(Program.RootDirectory);
+        }
+
+        private void LogButt_Click(object sender, EventArgs e)
+        {
+            if (File.Exists(Logger.LogPath))
+                Process.Start(Logger.LogPath);
+        }
+
+        private void RestartButt_Click(object sender, EventArgs e)
+        {
+            Logger.Log("Restart button clicked - restarting.");
+            Utils.StartWithParameters(
+                Assembly.GetEntryAssembly()!.Location,
+                $"{Program.ConsoleActions[Program.ConsoleAction.Open]}");
+
+            Application.Exit();
+            /*if (await Updater.IsUpdateAvailable())
+                Updater.DownloadLatestUpdateAsync(UpdateHandler);
+            else
+                MessageBox.Show("Používáte nejnovější verzi!", "Žádné aktualizace");*/
+        }
+
+        private void CloseButt_Click(object sender, EventArgs e)
+        {
+            if (RequestPassword())
+                Application.Exit();
+        }
+
+        private void ChangePasswordButt_Click(object sender, EventArgs e)
+        {
+            string? newPassword = ObtainTextOrNull(Properties.Resources.NewPassword, true);
+
+            if (newPassword is null || !RequestPassword())
+                return;
+
+            Config.SetValue(Config.Property.Password, newPassword);
+            Password = newPassword;
+
+        }
+
+        private void ToggleButt_Click(object sender, EventArgs e)
+        {
+            if (!RequestPassword())
+                return;
+
+            PassedTimeWatcher.Running = !PassedTimeWatcher.Running;
+        }
+
+        private void ChangeIdleTimeButt_Click(object sender, EventArgs e)
+        {
+            TimeSpan currTime = PassedTimeWatcher.IdleThreshold;
+            TimeSpan? time = ObtainTimeOrNull(currTime);
+            if (time is not null && RequestPassword())
+            {
+                PassedTimeWatcher.IdleThreshold = time.Value;
+                Config.SetValue(Config.Property.IdleThresholdMins, (int)time.Value.TotalMinutes);
+            }
+
+        }
+
+        private void ChangeResetHourButt_Click(object sender, EventArgs e)
+        {
+            TimeSpan currHour = TimeSpan.FromHours(ResetChecker.ResetHour);
+            TimeSpan? hour = ObtainTimeOrNull(currHour);
+            if (!hour.HasValue || hour == currHour || !RequestPassword())
+                return;
+
+            ResetChecker.ResetHour = (byte)hour.Value.Hours;
+            Config.SetValue(Config.Property.ResetHour, hour.Value.Hours);
+        }
+
+        private void ChangeMaxButt_Click(object sender, EventArgs e)
+        {
+            TimeSpan? time = ObtainTimeOrNull(PassedTimeWatcher.MaxTime);
+
+            if (!time.HasValue || !RequestPassword())
+                return;
+
+            Config.SetValue(Config.Property.MaxTimeMins, (int)time.Value.TotalMinutes);
+            PassedTimeWatcher.MaxTime = time.Value;
+
+            if (PassedTimeWatcher.PassedMillis < PassedTimeWatcher.MaxTime.TotalMilliseconds)
+                UnlockIfLocked();
+
+        }
+
+        private void ChangePassedButt_Click(object sender, EventArgs e)
+        {
+            TimeSpan? time = ObtainTimeOrNull(TimeSpan.FromMilliseconds(PassedTimeWatcher.PassedMillis));
+            if (!time.HasValue || !RequestPassword())
+                return;
+
+            PassedTimeWatcher.PassedMillis = (int)time.Value.TotalMilliseconds;
+            if (PassedTimeWatcher.PassedMillis < PassedTimeWatcher.MaxTime.TotalMilliseconds)
+                UnlockIfLocked();
+        }
+
+        private void DumpButt_Click(object sender, EventArgs e)
+        {
+            Logger.Log($"DUMP:\n" +
+           $"  Idle time during sleep: {Utils.FormatTime(PassedTimeWatcher.IdleMillisDuringSleep)}\n" +
+           $"  Last idle time: {Utils.FormatTime(PassedTimeWatcher.LastIdleTimeMillis)}\n");
         }
 
         #region Windows Form Designer generated code
@@ -511,6 +545,7 @@ namespace Wellbeing
             this.DumpButt.TabIndex = 11;
             this.DumpButt.Text = "Dump";
             this.DumpButt.UseVisualStyleBackColor = true;
+            this.DumpButt.Click += new System.EventHandler(this.DumpButt_Click);
             // 
             // RestartButt
             // 
@@ -594,74 +629,5 @@ namespace Wellbeing
         private System.Windows.Forms.Label TimeLbl;
 
         #endregion
-
-        private void MainForm_Load(object sender, EventArgs e)
-        {
-
-        }
-
-        private void AppButt_Click(object sender, EventArgs e)
-        {
-#if !DEBUG
-                if (!RequestPassword())
-                    return;
-#endif
-            Process.Start(Program.RootDirectory);
-        }
-
-        private void LogButt_Click(object sender, EventArgs e)
-        {
-            if (File.Exists(Logger.LogPath))
-                Process.Start(Logger.LogPath);
-        }
-
-        private void RestartButt_Click(object sender, EventArgs e)
-        {
-            Logger.Log("Restart button clicked - restarting.");
-            Utils.StartWithParameters(
-                Assembly.GetEntryAssembly()!.Location,
-                $"{Program.ConsoleActions[Program.ConsoleAction.Open]}");
-
-            Application.Exit();
-            /*if (await Updater.IsUpdateAvailable())
-                Updater.DownloadLatestUpdateAsync(UpdateHandler);
-            else
-                MessageBox.Show("Používáte nejnovější verzi!", "Žádné aktualizace");*/
-        }
-
-        private void CloseButt_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void ChangePasswordButt_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void ToggleButt_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void ChangeIdleTimeButt_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void ChangeResetHourButt_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void ChangeMaxButt_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void ChangePassedButt_Click(object sender, EventArgs e)
-        {
-
-        }
     }
 }
