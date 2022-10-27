@@ -15,6 +15,8 @@
     <LangVersion>default</LangVersion>
     <Nullable>enable</Nullable>
     <ApplicationIcon>program_icon.ico</ApplicationIcon>
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -37,7 +39,14 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Accessibility" />
+    <Reference Include="MQTTnet, Version=4.1.2.350, Culture=neutral, PublicKeyToken=fdb7629f2e364a63, processorArchitecture=MSIL">
+      <HintPath>packages\MQTTnet.4.1.2.350\lib\net461\MQTTnet.dll</HintPath>
+    </Reference>
+    <Reference Include="MQTTnet.Extensions.ManagedClient, Version=4.1.2.350, Culture=neutral, PublicKeyToken=fdb7629f2e364a63, processorArchitecture=MSIL">
+      <HintPath>packages\MQTTnet.Extensions.ManagedClient.4.1.2.350\lib\net461\MQTTnet.Extensions.ManagedClient.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
+    <Reference Include="System.ComponentModel.Composition" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -61,7 +70,7 @@
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="MainForm.Designer.cs" />
+    <Compile Include="MosquittoMqttClient.cs" />
     <Compile Include="PcLocker.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -106,7 +115,9 @@
     <EmbeddedResource Include="BlackBackground.resx">
       <DependentUpon>BlackBackground.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="MainForm.resx" />
+    <EmbeddedResource Include="MainForm.resx">
+      <DependentUpon>MainForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.fr.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.fr.Designer.cs</LastGenOutput>
@@ -141,6 +152,7 @@
       <DependentUpon>TextDialog.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="TimeDialog.resx" />
+    <None Include="packages.config" />
     <None Include="program_icon.ico" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
