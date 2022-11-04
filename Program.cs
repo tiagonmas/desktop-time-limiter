@@ -22,7 +22,7 @@ namespace Wellbeing
         };
         private static readonly NotifyIcon PinNotifyIcon = new()
         {
-            Text = "Klikni pro otevření/zavření",
+            Text = "Click to open/shut",
             Icon = Resources.program_icon,
             Visible = true
         };

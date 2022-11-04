@@ -34515,4 +34515,7 @@
   <data name="Password" xml:space="preserve">
     <value>Heslo</value>
   </data>
+  <data name="TimeAway" xml:space="preserve">
+    <value>čas mimo počítač</value>
+  </data>
 </root>

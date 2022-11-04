@@ -21,10 +21,17 @@ namespace Wellbeing
         
         private readonly ResetChecker ResetChecker;
         private readonly UpdateChecker UpdateChecker;
-        private readonly PcLocker PcLocker;
+        internal readonly PcLocker PcLocker;
         private int LastShownMins = int.MaxValue;
         private string? Password;
-        
+        private Button btnMqtt;
+        private StatusStrip statusStrip1;
+        private MenuStrip menuStrip1;
+        private ToolStripMenuItem settingsToolStripMenuItem;
+        private ToolStripMenuItem aboutToolStripMenuItem;
+        private ToolStripMenuItem pauseStartToolStripMenuItem;
+        private ToolStripMenuItem terminateToolStripMenuItem;
+        private ToolStripMenuItem restartToolStripMenuItem;
         private static readonly List<(int timePointMins, Action action)> TimeEvents = new()
         {
             (30, () =>
@@ -41,17 +48,8 @@ namespace Wellbeing
 
         public MainForm()
         {
-            string userName = System.Security.Principal.WindowsIdentity.GetCurrent().Name;
-            var pc= System.Net.Dns.GetHostName();
-            //MqttClient.Instance.Send("test");
-
-            MqttClient.Instance.Send("wellbeing/v-tiagoand-lp3/tiagoand", "{date:"+DateTime.Now+", status:on, time:40}");
-            MqttClient.Instance.Send("wellbeing/v-tiagoand-lp3/tiagoand", "{date:" + DateTime.Now + ", status:off, time:40}");
-            MqttClient.Instance.Send("wellbeing/slapc/kikoberlenga", "{date:" + DateTime.Now + ", status:on, time:41}");
-
 
             Thread.CurrentThread.CurrentUICulture = CultureInfo.InstalledUICulture;
-            //Thread.CurrentThread.CurrentUICulture = new CultureInfo("pt-PT");
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             resources.ApplyResources(this, "$this");
 
@@ -272,7 +270,7 @@ namespace Wellbeing
 
         private void MainForm_Load(object sender, EventArgs e)
         {
-
+            HomeAssistantMqtt.Instance.Register();
         }
 
         private void AppButt_Click(object sender, EventArgs e)
@@ -404,12 +402,21 @@ namespace Wellbeing
             this.DumpButt = new System.Windows.Forms.Button();
             this.RestartButt = new System.Windows.Forms.Button();
             this.IdleLbl = new System.Windows.Forms.Label();
+            this.btnMqtt = new System.Windows.Forms.Button();
+            this.statusStrip1 = new System.Windows.Forms.StatusStrip();
+            this.menuStrip1 = new System.Windows.Forms.MenuStrip();
+            this.settingsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.pauseStartToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.terminateToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.restartToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
             // TimeLbl
             // 
             this.TimeLbl.Font = new System.Drawing.Font("Microsoft YaHei UI", 20.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.TimeLbl.Location = new System.Drawing.Point(12, 9);
+            this.TimeLbl.Location = new System.Drawing.Point(9, 24);
             this.TimeLbl.Name = "TimeLbl";
             this.TimeLbl.Size = new System.Drawing.Size(415, 81);
             this.TimeLbl.TabIndex = 0;
@@ -419,7 +426,7 @@ namespace Wellbeing
             // CloseButt
             // 
             this.CloseButt.Font = new System.Drawing.Font("Microsoft YaHei UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.CloseButt.Location = new System.Drawing.Point(34, 421);
+            this.CloseButt.Location = new System.Drawing.Point(34, 397);
             this.CloseButt.Name = "CloseButt";
             this.CloseButt.Size = new System.Drawing.Size(171, 58);
             this.CloseButt.TabIndex = 6;
@@ -463,7 +470,7 @@ namespace Wellbeing
             // StatusLbl
             // 
             this.StatusLbl.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.StatusLbl.Location = new System.Drawing.Point(16, 73);
+            this.StatusLbl.Location = new System.Drawing.Point(12, 82);
             this.StatusLbl.Name = "StatusLbl";
             this.StatusLbl.Size = new System.Drawing.Size(144, 23);
             this.StatusLbl.TabIndex = 0;
@@ -506,7 +513,7 @@ namespace Wellbeing
             // versionLbl
             // 
             this.versionLbl.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.versionLbl.Location = new System.Drawing.Point(386, 502);
+            this.versionLbl.Location = new System.Drawing.Point(388, 470);
             this.versionLbl.Name = "versionLbl";
             this.versionLbl.Size = new System.Drawing.Size(38, 23);
             this.versionLbl.TabIndex = 8;
@@ -516,7 +523,7 @@ namespace Wellbeing
             // LogButt
             // 
             this.LogButt.Font = new System.Drawing.Font("Microsoft YaHei UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.LogButt.Location = new System.Drawing.Point(329, 502);
+            this.LogButt.Location = new System.Drawing.Point(331, 470);
             this.LogButt.Name = "LogButt";
             this.LogButt.Size = new System.Drawing.Size(51, 23);
             this.LogButt.TabIndex = 9;
@@ -527,7 +534,7 @@ namespace Wellbeing
             // AppButt
             // 
             this.AppButt.Font = new System.Drawing.Font("Microsoft YaHei UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.AppButt.Location = new System.Drawing.Point(272, 502);
+            this.AppButt.Location = new System.Drawing.Point(274, 470);
             this.AppButt.Name = "AppButt";
             this.AppButt.Size = new System.Drawing.Size(51, 23);
             this.AppButt.TabIndex = 10;
@@ -549,7 +556,7 @@ namespace Wellbeing
             // RestartButt
             // 
             this.RestartButt.Font = new System.Drawing.Font("Microsoft YaHei UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.RestartButt.Location = new System.Drawing.Point(232, 421);
+            this.RestartButt.Location = new System.Drawing.Point(232, 406);
             this.RestartButt.Name = "RestartButt";
             this.RestartButt.Size = new System.Drawing.Size(171, 58);
             this.RestartButt.TabIndex = 12;
@@ -559,18 +566,86 @@ namespace Wellbeing
             // 
             // IdleLbl
             // 
-            this.IdleLbl.Location = new System.Drawing.Point(105, 502);
+            this.IdleLbl.Location = new System.Drawing.Point(107, 470);
             this.IdleLbl.Name = "IdleLbl";
             this.IdleLbl.Size = new System.Drawing.Size(161, 23);
             this.IdleLbl.TabIndex = 14;
-            this.IdleLbl.Text = "-- čas mimo počítač";
+            this.IdleLbl.Text = "time away from the computer";
             this.IdleLbl.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.IdleLbl.Click += new System.EventHandler(this.IdleLbl_Click);
+            // 
+            // btnMqtt
+            // 
+            this.btnMqtt.Location = new System.Drawing.Point(36, 473);
+            this.btnMqtt.Name = "btnMqtt";
+            this.btnMqtt.Size = new System.Drawing.Size(74, 19);
+            this.btnMqtt.TabIndex = 15;
+            this.btnMqtt.Text = "MQTT";
+            this.btnMqtt.UseVisualStyleBackColor = true;
+            this.btnMqtt.Click += new System.EventHandler(this.btnMqtt_Click);
+            // 
+            // statusStrip1
+            // 
+            this.statusStrip1.Location = new System.Drawing.Point(0, 515);
+            this.statusStrip1.Name = "statusStrip1";
+            this.statusStrip1.Size = new System.Drawing.Size(439, 22);
+            this.statusStrip1.TabIndex = 16;
+            this.statusStrip1.Text = "statusStrip1";
+            // 
+            // menuStrip1
+            // 
+            this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.settingsToolStripMenuItem,
+            this.aboutToolStripMenuItem});
+            this.menuStrip1.Location = new System.Drawing.Point(0, 0);
+            this.menuStrip1.Name = "menuStrip1";
+            this.menuStrip1.Size = new System.Drawing.Size(439, 24);
+            this.menuStrip1.TabIndex = 17;
+            this.menuStrip1.Text = "menuStrip1";
+            // 
+            // settingsToolStripMenuItem
+            // 
+            this.settingsToolStripMenuItem.Name = "settingsToolStripMenuItem";
+            this.settingsToolStripMenuItem.Size = new System.Drawing.Size(61, 20);
+            this.settingsToolStripMenuItem.Text = "Settings";
+            // 
+            // aboutToolStripMenuItem
+            // 
+            this.aboutToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.pauseStartToolStripMenuItem,
+            this.terminateToolStripMenuItem,
+            this.restartToolStripMenuItem});
+            this.aboutToolStripMenuItem.Name = "aboutToolStripMenuItem";
+            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(71, 20);
+            this.aboutToolStripMenuItem.Text = "Execution";
+            this.aboutToolStripMenuItem.Click += new System.EventHandler(this.aboutToolStripMenuItem_Click);
+            // 
+            // pauseStartToolStripMenuItem
+            // 
+            this.pauseStartToolStripMenuItem.Name = "pauseStartToolStripMenuItem";
+            this.pauseStartToolStripMenuItem.Size = new System.Drawing.Size(140, 22);
+            this.pauseStartToolStripMenuItem.Text = "Pause / Start";
+            // 
+            // terminateToolStripMenuItem
+            // 
+            this.terminateToolStripMenuItem.Name = "terminateToolStripMenuItem";
+            this.terminateToolStripMenuItem.Size = new System.Drawing.Size(140, 22);
+            this.terminateToolStripMenuItem.Text = "Terminate";
+            // 
+            // restartToolStripMenuItem
+            // 
+            this.restartToolStripMenuItem.Name = "restartToolStripMenuItem";
+            this.restartToolStripMenuItem.Size = new System.Drawing.Size(140, 22);
+            this.restartToolStripMenuItem.Text = "Restart";
             // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(439, 537);
+            this.Controls.Add(this.statusStrip1);
+            this.Controls.Add(this.menuStrip1);
+            this.Controls.Add(this.btnMqtt);
             this.Controls.Add(this.IdleLbl);
             this.Controls.Add(this.RestartButt);
             this.Controls.Add(this.DumpButt);
@@ -587,6 +662,7 @@ namespace Wellbeing
             this.Controls.Add(this.CloseButt);
             this.Controls.Add(this.TimeLbl);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
+            this.MainMenuStrip = this.menuStrip1;
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "MainForm";
@@ -595,7 +671,10 @@ namespace Wellbeing
             this.Text = "Digital well-being";
             this.TopMost = true;
             this.Load += new System.EventHandler(this.MainForm_Load);
+            this.menuStrip1.ResumeLayout(false);
+            this.menuStrip1.PerformLayout();
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
 
@@ -628,5 +707,21 @@ namespace Wellbeing
         private System.Windows.Forms.Label TimeLbl;
 
         #endregion
+
+        private void IdleLbl_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void btnMqtt_Click(object sender, EventArgs e)
+        {
+            var mqttForm = new MqttForm();
+            mqttForm.Show();
+        }
+
+        private void aboutToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+
+        }
     }
 }

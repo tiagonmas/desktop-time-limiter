@@ -5,5 +5,20 @@
     <Setting Name="DefaultPassword" Type="System.String" Scope="User">
       <Value Profile="(Default)">P@ssw0rd</Value>
     </Setting>
+    <Setting Name="MqttIntervalMins" Type="System.Decimal" Scope="User">
+      <Value Profile="(Default)">10</Value>
+    </Setting>
+    <Setting Name="MqttEnabled" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="MqttAddress" Type="System.String" Scope="User">
+      <Value Profile="(Default)">192.168.1.1</Value>
+    </Setting>
+    <Setting Name="MqttUsername" Type="System.String" Scope="User">
+      <Value Profile="(Default)">MqttUsername</Value>
+    </Setting>
+    <Setting Name="MqttPassword" Type="System.String" Scope="User">
+      <Value Profile="(Default)">MqttPassword</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

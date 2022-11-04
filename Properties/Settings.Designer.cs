@@ -34,5 +34,65 @@ namespace Wellbeing.Properties {
                 this["DefaultPassword"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("10")]
+        public decimal MqttIntervalMins {
+            get {
+                return ((decimal)(this["MqttIntervalMins"]));
+            }
+            set {
+                this["MqttIntervalMins"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool MqttEnabled {
+            get {
+                return ((bool)(this["MqttEnabled"]));
+            }
+            set {
+                this["MqttEnabled"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("192.168.1.1")]
+        public string MqttAddress {
+            get {
+                return ((string)(this["MqttAddress"]));
+            }
+            set {
+                this["MqttAddress"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("MqttUsername")]
+        public string MqttUsername {
+            get {
+                return ((string)(this["MqttUsername"]));
+            }
+            set {
+                this["MqttUsername"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("MqttPassword")]
+        public string MqttPassword {
+            get {
+                return ((string)(this["MqttPassword"]));
+            }
+            set {
+                this["MqttPassword"] = value;
+            }
+        }
     }
 }

@@ -258,5 +258,14 @@ namespace Wellbeing.Properties {
                 return ResourceManager.GetStream("time_reached", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to time away from the computer.
+        /// </summary>
+        internal static string TimeAway {
+            get {
+                return ResourceManager.GetString("TimeAway", resourceCulture);
+            }
+        }
     }
 }

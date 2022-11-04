@@ -7793,6 +7793,9 @@
   <data name="Time" xml:space="preserve">
     <value>Time</value>
   </data>
+  <data name="TimeAway" xml:space="preserve">
+    <value>time away from the computer</value>
+  </data>
   <data name="time_reached" mimetype="application/x-microsoft.net.object.binary.base64">
     <value>
         AAEAAAD/////AQAAAAAAAAAEAQAAABZTeXN0ZW0uSU8uTWVtb3J5U3RyZWFtCgAAAAdfYnVmZmVyB19v

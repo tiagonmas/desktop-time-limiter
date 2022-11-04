@@ -25,15 +25,19 @@ public static class Updater
     {
         string[] availableVersions = await FetchAvailableVersions();
 
-        Logger.Log("Available versions: ", false);
-        Array.ForEach(availableVersions, x => Logger.Log(x, false));
+        if (availableVersions != null)
+        {
+            Logger.Log("Available versions: ", false);
+            Array.ForEach(availableVersions, x => Logger.Log(x, false));
 
-        string highestVer = GetHighestVersion(availableVersions);
-        bool highestIsHigherThanCurr = IsVersionHigher(highestVer, Program.Version);
-        
-        Logger.Log($"Update checked. Highest version: {highestVer} | is newer: {highestIsHigherThanCurr}");
+            string highestVer = GetHighestVersion(availableVersions);
+            bool highestIsHigherThanCurr = IsVersionHigher(highestVer, Program.Version);
 
-        return highestIsHigherThanCurr;
+            Logger.Log($"Update checked. Highest version: {highestVer} | is newer: {highestIsHigherThanCurr}");
+
+            return highestIsHigherThanCurr;
+        }
+        else { return false; }
     }
 
     public static void DownloadLatestUpdateAsync(Action<Action> downloadedHandler)
@@ -71,17 +75,22 @@ public static class Updater
     
     private static async Task<string[]> FetchAvailableVersions()
     {
-        using HttpResponseMessage response = await Client.GetAsync(TagsUrl);
-        using HttpContent content = response.Content;
-        string result = await content.ReadAsStringAsync();
-            
-        MatchCollection matches = VersionRegex.Matches(result);
-        string[] matchedVersions = new string[matches.Count];
+        try
+        {
+            using HttpResponseMessage response = await Client.GetAsync(TagsUrl);
+            using HttpContent content = response.Content;
+            string result = await content.ReadAsStringAsync();
 
-        for (int i = 0; i < matches.Count; ++i)
-            matchedVersions[i] = matches[i].Value;
+            MatchCollection matches = VersionRegex.Matches(result);
+            string[] matchedVersions = new string[matches.Count];
 
-        return matchedVersions;
+            for (int i = 0; i < matches.Count; ++i)
+                matchedVersions[i] = matches[i].Value;
+
+            return matchedVersions;
+        }
+        catch (Exception) {}
+        return null;
     }
 
     private static string GetHighestVersion(IReadOnlyList<string> versions)

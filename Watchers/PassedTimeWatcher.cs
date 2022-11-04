@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Threading;
+using Wellbeing.Properties;
 
 namespace Wellbeing
 {
@@ -12,17 +13,19 @@ namespace Wellbeing
         public static event EventHandler<bool>? OnRunningChanged;
         
         private static readonly int AutosaveFrequencyMillis = (int)TimeSpan.FromMinutes(5).TotalMilliseconds;
-        private const int UpdateFrequencyMillis = 1000;
+        private const int UpdateFrequencyMillis = 5000;
         private static readonly Timer Timer = new(OnTimerTick, null, Timeout.Infinite, UpdateFrequencyMillis);
         
         public static TimeSpan MaxTime;
         public static TimeSpan IdleThreshold;
         private static uint AutosaveCounterMillis;
+        private static uint MQTTCounterMillis;
         public static uint LastIdleTimeMillis { get; private set; }
         public static uint IdleMillisDuringSleep { get; private set; }
         public static bool Idle { get; private set; }
         public static int PassedMillis;
         private static bool _Running;
+        private static bool _locked=false;
         public static bool Running
         {
             get => _Running;
@@ -53,6 +56,23 @@ namespace Wellbeing
                 SaveToConfig();
                 AutosaveCounterMillis = 0;
             }
+
+            if (Properties.Settings.Default.MqttEnabled)
+            {
+                MQTTCounterMillis += UpdateFrequencyMillis;
+                if (MQTTCounterMillis >= Properties.Settings.Default.MqttIntervalMins * 60000)
+                {
+                    TimeSpan passedTime = TimeSpan.FromMilliseconds(PassedMillis);
+                    TimeSpan remainingTime = TimeSpan.FromMilliseconds((int)MaxTime.TotalMilliseconds - PassedMillis);
+                    HomeAssistantMqtt.Instance.Update(passedTime, remainingTime, Idle,false);
+                    //HomeAssistantMqtt.Instance.Update(PassedMillis,Idle, false);
+
+                    MQTTCounterMillis = 0;
+                }
+
+            }
+
+
 
             bool isIdleAfterSleep = idleTimeMillis > LastIdleTimeMillis + UpdateFrequencyMillis * 3;
             

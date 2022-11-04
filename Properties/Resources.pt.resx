@@ -34515,4 +34515,7 @@
   <data name="AppTitle" xml:space="preserve">
     <value>Bem-estar digital</value>
   </data>
+  <data name="TimeAway" xml:space="preserve">
+    <value>tempo longe do computador</value>
+  </data>
 </root>
