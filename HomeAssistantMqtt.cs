@@ -36,9 +36,10 @@ namespace Wellbeing
             var AwayStatus = idle ? "False" : "True";
             //var LockedStatus = locked ? "False" : "True";
 
+            //CONFIG
             string json;
             //'Binary Sensor Active'
-            json = $"{{\"~\":\"wellbeing/{pcName}/{userName}/\",\"object_id\":\"{pcName}_{userName}_Idle\",\"name\":\"{pcName}/{userName} Active or not\", \"stat_t\": \"~IDLE\",\"payload_on\":\"True\",\"payload_off\":\"False\",\"unique_id\": \"{pcName}_{userName}_Idle\", \"dev_cla\":\"presence\",\"dev\": {{\"identifiers\": \"{pcName}_{userName}\",\"manufacturer\": \"Wellbeing\",\"name\": \"{pcName}_{userName}\", \"model\": \"Windows\"}}}}";
+            json = $"{{\"~\":\"wellbeing/{pcName}/{userName}/\",\"object_id\":\"{pcName}_{userName}_Idle\",\"name\":\"{pcName}/{userName} Active or not\", \"state_topic\": \"~IDLE\",\"payload_on\":\"True\",\"payload_off\":\"False\",\"unique_id\": \"{pcName}_{userName}_Idle\", \"dev_cla\":\"presence\",\"dev\": {{\"identifiers\": \"{pcName}_{userName}\",\"manufacturer\": \"Wellbeing\",\"name\": \"{pcName}_{userName}\", \"model\": \"Windows\"}}}}";
             MqttClient.Instance.Send($"homeassistant/binary_sensor/{pcName}_{userName}_Active/config", json);
 
             ////'Binary Sensor Locked'
@@ -46,18 +47,15 @@ namespace Wellbeing
             //MqttClient.Instance.Send($"homeassistant/binary_sensor/{pcName}_{userName}_Active/config", json);
 
             //'Sensor'
-            json = $"{{\"~\":\"wellbeing/{pcName}/{userName}/\",\"object_id\":\"{pcName}_{userName}_Total\", \"name\":\"{pcName}/{userName} Total Time in minutes\", \"avty_t\": \"~STATE\", \"payload_on\":\"ON\",\"payload_off\":\"OFF\",\"stat_t\": \"~SENSOR\",\"value_template\":\"{{{{value_json.time}}}}\",\"unique_id\": \"{pcName}_{userName}_Time\", \"dev_cla\":\"duration\", \"dev\": {{\"identifiers\": \"{pcName}_{userName}\",\"manufacturer\": \"Wellbeing\",\"name\": \"{pcName}_{userName}\", \"model\": \"Windows\"}}}}";
-            //json = $"{{\"~\":\"wellbeing/{pcName}/{userName}/\",\"object_id\":\"{pcName}_{userName}_Total\", \"name\":\"{pcName}/{userName} Total Time in minutes\", \"avty_t\": \"~STATE\", \"unit_of_measurement\":\"m\",\"stat_t\": \"~SENSOR\",\"value_template\":\"{{{{value_json.time}}}}\",\"unique_id\": \"{pcName}_{userName}_Time\", \"dev\": {{\"identifiers\": \"{pcName}_{userName}\",\"manufacturer\": \"Wellbeing\",\"name\": \"{pcName}_{userName}\", \"model\": \"Windows\"}}}}";
+            json = $"{{\"~\":\"wellbeing/{pcName}/{userName}/\",\"object_id\":\"{pcName}_{userName}_Total\", \"name\":\"{pcName}/{userName} Total Time in minutes\", \"availability_topic\": \"~LWT\", \"state_topic\": \"~SENSOR\",\"value_template\":\"{{{{value_json.time | default(none)}}}}\",\"unique_id\": \"{pcName}_{userName}_Total\", \"device_class\":\"duration\", \"dev\": {{\"identifiers\": \"{pcName}_{userName}\",\"manufacturer\": \"Wellbeing\",\"name\": \"{pcName}_{userName}\", \"model\": \"Windows\"}}}}";
             MqttClient.Instance.Send($"homeassistant/sensor/{pcName}_{userName}_Time/config", json);
 
-
-            MqttClient.Instance.Send($"wellbeing/{pcName}/{userName}/STATE", "ON");
-
+            //Sensor Data
+            MqttClient.Instance.Send($"wellbeing/{pcName}/{userName}/LWT", "online");
             MqttClient.Instance.Send($"wellbeing/{pcName}/{userName}/IDLE", AwayStatus);
-
             //MqttClient.Instance.Send($"wellbeing/{pcName}/{userName}/LOCKED", LockedStatus);
-
             MqttClient.Instance.Send($"wellbeing/{pcName}/{userName}/SENSOR", $"{{\"time\":{passed.Hours*60+passed.Minutes}}}");
+
             Logger.Log("Mqqtt update");
 
         }
