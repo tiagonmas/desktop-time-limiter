@@ -35,6 +35,22 @@ namespace Wellbeing
         [STAThread]
         private static void Main(string[] args)
         {
+
+            AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(MyHandler);
+
+            //Check if single instance per user of the App http://getgoingit.blogspot.com/2016/05/single-instance-per-user-of-desktop.html
+            String mutexName = "Wellbeing" +
+            System.Security.Principal.WindowsIdentity.GetCurrent().User.AccountDomainSid;
+
+            Boolean createdNew;
+
+            Mutex mutex = new Mutex(true, mutexName, out createdNew);
+
+            if (!createdNew) {
+                Logger.Log("Mutex Instance is not single, closing.");
+                return;
+            }
+
             if (!Directory.Exists(RootDirectory))
             {
                 Logger.Log("Program directory did not exist, creating.");
@@ -82,11 +98,11 @@ namespace Wellbeing
                 return;
             }
 #endif
-            if (!CheckIsSingleInstance())
-            {
-                Logger.Log("Instance is not single, closing.");
-                return;
-            }
+            //if (!CheckIsSingleInstance())
+            //{
+            //    Logger.Log("Instance is not single, closing.");
+            //    return;
+            //}
                 
             //StartupLauncher.ExcludeFromDefender();
             Logger.Log("Set launch on startup registry value.");
@@ -195,6 +211,7 @@ namespace Wellbeing
         /// </summary>
         public static void CloseOtherProcess()
         {
+            Console.WriteLine("Closing another process!");
             Process[] runningProcesses = Process.GetProcesses();
             int ownProcessId = Process.GetCurrentProcess().Id;
             foreach (Process process in runningProcesses)
@@ -208,6 +225,13 @@ namespace Wellbeing
                     process.WaitForExit(2000);
                 }
             }
+        }
+
+        static void MyHandler(object sender, UnhandledExceptionEventArgs args)
+        {
+            Exception e = (Exception)args.ExceptionObject;
+            Console.WriteLine("Unhandled exception:" + e.Message);
+            Logger.Log("Global Error: " + e.Message);
         }
     }
 }
