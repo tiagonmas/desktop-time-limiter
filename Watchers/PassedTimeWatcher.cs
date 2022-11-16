@@ -26,6 +26,7 @@ namespace Wellbeing
         public static int PassedMillis;
         private static bool _Running;
         private static bool _locked=false;
+        internal static DateTime SlotStart;
         public static bool Running
         {
             get => _Running;
@@ -38,9 +39,12 @@ namespace Wellbeing
                 LastIdleTimeMillis = IdleTimeWatcher.IdleTimeMillis;
                 _Running = value;
                 if (value)
-                    Timer.Change(0, UpdateFrequencyMillis);
+                { Timer.Change(0, UpdateFrequencyMillis);
+                    SlotStart= DateTime.Now;
+                    Logger.Log("Slot Start", true);
+                }
                 else
-                    Timer.Change(-1, -1);
+                { Timer.Change(-1, -1); }
                 
                 OnRunningChanged?.Invoke(null, value);
             }
@@ -65,7 +69,6 @@ namespace Wellbeing
                     TimeSpan passedTime = TimeSpan.FromMilliseconds(PassedMillis);
                     TimeSpan remainingTime = TimeSpan.FromMilliseconds((int)MaxTime.TotalMilliseconds - PassedMillis);
                     HomeAssistantMqtt.Instance.Update(passedTime, remainingTime, Idle,false);
-                    //HomeAssistantMqtt.Instance.Update(PassedMillis,Idle, false);
 
                     MQTTCounterMillis = 0;
                 }
@@ -84,6 +87,7 @@ namespace Wellbeing
                            $"Idle during sleep: {Utils.FormatTime(IdleMillisDuringSleep)} | " +
                            $"Idle before sleep: {Utils.FormatTime(idleTimeMillis - IdleMillisDuringSleep)} | " +
                            $"Idle total: {Utils.FormatTime(idleTimeMillis)}");
+                SlotStart = DateTime.Now;
             }
             else if (idleTimeMillis <= UpdateFrequencyMillis * 3)
                 IdleMillisDuringSleep = 0;
@@ -105,10 +109,15 @@ namespace Wellbeing
                 return;
             Idle = true;
             Logger.Log($"Has just became idle", false);
-            if (idleTimeMillis > PassedMillis)
-                PassedMillis = 0;
-            else
-                PassedMillis -= (int)idleTimeMillis;
+            Console.WriteLine("Going idle with Passed Time="+ PassedMillis);
+            HomeAssistantMqtt.Instance.UpdateSlot(DateTime.Now.Subtract(SlotStart));
+            //if (idleTimeMillis > PassedMillis)
+            //{
+            //    Logger.Log($"Reset passed millis", true);
+            //    PassedMillis = 0;
+            //}
+            //else
+            //{ PassedMillis -= (int)idleTimeMillis; }
         }
 
         private static void HandleTick(uint idleTimeMillis)
