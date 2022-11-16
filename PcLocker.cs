@@ -16,6 +16,7 @@ namespace Wellbeing
         }
         public void Lock()
         {
+            Logger.Log("Lock event in SessionChangeHandler.");
             if (Locked)
                 return;
 
@@ -30,7 +31,7 @@ namespace Wellbeing
         {
             if (!Locked)
             {
-                Logger.Log("Unlock event was not removed properly in PcLocker from SessionChangeHandler.");
+                Logger.Log("HandleMachineUnlocked: Unlock event was not removed properly in PcLocker from SessionChangeHandler.");
                 return;
             }
         }
@@ -44,6 +45,7 @@ namespace Wellbeing
             LockHandler.UnregisterHandler();
             Overlay.Hide();
             Locked = false;
+            Logger.Log("Unlock event in SessionChangeHandler.");
         }
     }
 }
