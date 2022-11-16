@@ -77,5 +77,10 @@ namespace Wellbeing
         {
             
         }
+
+        private void cbMqttEnabled_CheckedChanged(object sender, EventArgs e)
+        {
+
+        }
     }
 }

@@ -48,12 +48,12 @@ namespace Wellbeing
                 // will be sent when the client is connected.
                 await managedMqttClient.EnqueueAsync(topic, payload);
 
-                Console.WriteLine("The managed MQTT client is connected.");
+                //Console.WriteLine("The managed MQTT client is connected.");
 
                 // Wait until the queue is fully processed.
                 SpinWait.SpinUntil(() => managedMqttClient.PendingApplicationMessagesCount == 0, 10000);
 
-                Console.WriteLine($"Pending messages = {managedMqttClient.PendingApplicationMessagesCount}");
+                //Console.WriteLine($"Pending messages = {managedMqttClient.PendingApplicationMessagesCount}");
             }
         }
     }

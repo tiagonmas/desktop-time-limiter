@@ -26,12 +26,6 @@ namespace Wellbeing
         private string? Password;
         private Button btnMqtt;
         private StatusStrip statusStrip1;
-        private MenuStrip menuStrip1;
-        private ToolStripMenuItem settingsToolStripMenuItem;
-        private ToolStripMenuItem aboutToolStripMenuItem;
-        private ToolStripMenuItem pauseStartToolStripMenuItem;
-        private ToolStripMenuItem terminateToolStripMenuItem;
-        private ToolStripMenuItem restartToolStripMenuItem;
         private static readonly List<(int timePointMins, Action action)> TimeEvents = new()
         {
             (30, () =>
@@ -270,7 +264,9 @@ namespace Wellbeing
 
         private void MainForm_Load(object sender, EventArgs e)
         {
-            HomeAssistantMqtt.Instance.Register();
+            if (Properties.Settings.Default.MqttEnabled)
+            { HomeAssistantMqtt.Instance.Register(); }
+
         }
 
         private void AppButt_Click(object sender, EventArgs e)
@@ -404,19 +400,12 @@ namespace Wellbeing
             this.IdleLbl = new System.Windows.Forms.Label();
             this.btnMqtt = new System.Windows.Forms.Button();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
-            this.menuStrip1 = new System.Windows.Forms.MenuStrip();
-            this.settingsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.pauseStartToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.terminateToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.restartToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
             // TimeLbl
             // 
             this.TimeLbl.Font = new System.Drawing.Font("Microsoft YaHei UI", 20.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.TimeLbl.Location = new System.Drawing.Point(9, 24);
+            this.TimeLbl.Location = new System.Drawing.Point(10, 1);
             this.TimeLbl.Name = "TimeLbl";
             this.TimeLbl.Size = new System.Drawing.Size(415, 81);
             this.TimeLbl.TabIndex = 0;
@@ -540,6 +529,7 @@ namespace Wellbeing
             this.AppButt.TabIndex = 10;
             this.AppButt.Text = "App";
             this.AppButt.UseVisualStyleBackColor = true;
+            this.AppButt.Visible = false;
             this.AppButt.Click += new System.EventHandler(this.AppButt_Click);
             // 
             // DumpButt
@@ -592,59 +582,12 @@ namespace Wellbeing
             this.statusStrip1.TabIndex = 16;
             this.statusStrip1.Text = "statusStrip1";
             // 
-            // menuStrip1
-            // 
-            this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.settingsToolStripMenuItem,
-            this.aboutToolStripMenuItem});
-            this.menuStrip1.Location = new System.Drawing.Point(0, 0);
-            this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(439, 24);
-            this.menuStrip1.TabIndex = 17;
-            this.menuStrip1.Text = "menuStrip1";
-            // 
-            // settingsToolStripMenuItem
-            // 
-            this.settingsToolStripMenuItem.Name = "settingsToolStripMenuItem";
-            this.settingsToolStripMenuItem.Size = new System.Drawing.Size(61, 20);
-            this.settingsToolStripMenuItem.Text = "Settings";
-            // 
-            // aboutToolStripMenuItem
-            // 
-            this.aboutToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.pauseStartToolStripMenuItem,
-            this.terminateToolStripMenuItem,
-            this.restartToolStripMenuItem});
-            this.aboutToolStripMenuItem.Name = "aboutToolStripMenuItem";
-            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(71, 20);
-            this.aboutToolStripMenuItem.Text = "Execution";
-            this.aboutToolStripMenuItem.Click += new System.EventHandler(this.aboutToolStripMenuItem_Click);
-            // 
-            // pauseStartToolStripMenuItem
-            // 
-            this.pauseStartToolStripMenuItem.Name = "pauseStartToolStripMenuItem";
-            this.pauseStartToolStripMenuItem.Size = new System.Drawing.Size(140, 22);
-            this.pauseStartToolStripMenuItem.Text = "Pause / Start";
-            // 
-            // terminateToolStripMenuItem
-            // 
-            this.terminateToolStripMenuItem.Name = "terminateToolStripMenuItem";
-            this.terminateToolStripMenuItem.Size = new System.Drawing.Size(140, 22);
-            this.terminateToolStripMenuItem.Text = "Terminate";
-            // 
-            // restartToolStripMenuItem
-            // 
-            this.restartToolStripMenuItem.Name = "restartToolStripMenuItem";
-            this.restartToolStripMenuItem.Size = new System.Drawing.Size(140, 22);
-            this.restartToolStripMenuItem.Text = "Restart";
-            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(439, 537);
             this.Controls.Add(this.statusStrip1);
-            this.Controls.Add(this.menuStrip1);
             this.Controls.Add(this.btnMqtt);
             this.Controls.Add(this.IdleLbl);
             this.Controls.Add(this.RestartButt);
@@ -662,7 +605,6 @@ namespace Wellbeing
             this.Controls.Add(this.CloseButt);
             this.Controls.Add(this.TimeLbl);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
-            this.MainMenuStrip = this.menuStrip1;
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "MainForm";
@@ -671,8 +613,6 @@ namespace Wellbeing
             this.Text = "Digital well-being";
             this.TopMost = true;
             this.Load += new System.EventHandler(this.MainForm_Load);
-            this.menuStrip1.ResumeLayout(false);
-            this.menuStrip1.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 

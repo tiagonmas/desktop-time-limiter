@@ -53,6 +53,7 @@
             this.cbMqttEnabled.TabIndex = 0;
             this.cbMqttEnabled.Text = "Publish data to Mqtt";
             this.cbMqttEnabled.UseVisualStyleBackColor = true;
+            this.cbMqttEnabled.CheckedChanged += new System.EventHandler(this.cbMqttEnabled_CheckedChanged);
             // 
             // label1
             // 
