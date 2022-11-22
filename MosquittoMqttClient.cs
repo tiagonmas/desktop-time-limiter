@@ -26,7 +26,7 @@ namespace Wellbeing
             }
         }
 
-        public async Task Send(String topic, String payload)
+        public async Task Send(String topic, String payload, bool retain)
         {
 
             var mqttFactory = new MqttFactory();
@@ -46,7 +46,7 @@ namespace Wellbeing
 
                 // The application message is not sent. It is stored in an internal queue and
                 // will be sent when the client is connected.
-                await managedMqttClient.EnqueueAsync(topic, payload);
+                await managedMqttClient.EnqueueAsync(topic, payload,retain:retain);
 
                 //Console.WriteLine("The managed MQTT client is connected.");
 
