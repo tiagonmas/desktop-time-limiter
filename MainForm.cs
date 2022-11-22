@@ -65,8 +65,13 @@ namespace Wellbeing
                 Updater.DownloadLatestUpdateAsync(UpdateHandler);
             };
             
+           
             PassedTimeWatcher.OnRunningChanged += (_, running) =>
-                Invoke(new EventHandler((_, _) => StatusLbl.Text = running ? Properties.Resources.On : Properties.Resources.Suspended));
+                Invoke(new EventHandler((_, _) =>
+                    { StatusLbl.Text = running ? Properties.Resources.On : Properties.Resources.Suspended;
+                        Logger.Log("OnRunningChanged: " + running);
+                    }
+                ));
             PassedTimeWatcher.OnUpdate += (_, time) =>
                 Invoke(new EventHandler((_, _) => HandleTick(time.passedMillis, time.remainingMillis)));
             PassedTimeWatcher.OnMaxTimeReached += (_, _) =>
@@ -163,20 +168,20 @@ namespace Wellbeing
         protected override void OnResizeEnd(EventArgs e)
         {
             base.OnResizeEnd(e);
-            int rightSideXPos = Location.X + Width;
-            int bottomSideYPos = Location.Y + Height;
+            //int rightSideXPos = Location.X + Width;
+            //int bottomSideYPos = Location.Y + Height;
             
-            int screenMaxY = Screen.PrimaryScreen.Bounds.Height;
-            int screenMaxX = Screen.PrimaryScreen.Bounds.Width;
+            //int screenMaxY = Screen.PrimaryScreen.Bounds.Height;
+            //int screenMaxX = Screen.PrimaryScreen.Bounds.Width;
 
-            if (rightSideXPos > screenMaxX)
-                Location = Location with { X = screenMaxX - Width };
-            if (bottomSideYPos > screenMaxY)
-                Location = Location with { Y = screenMaxY - Height };
-            if (Location.X < 0)
-                Location = Location with { X = 0 };
-            if (Location.Y < 0)
-                Location = Location with { Y = 0 };
+            //if (rightSideXPos > screenMaxX)
+            //    Location = Location with { X = screenMaxX - Width };
+            //if (bottomSideYPos > screenMaxY)
+            //    Location = Location with { Y = screenMaxY - Height };
+            //if (Location.X < 0)
+            //    Location = Location with { X = 0 };
+            //if (Location.Y < 0)
+            //    Location = Location with { Y = 0 };
         }
 
 
@@ -265,7 +270,8 @@ namespace Wellbeing
         private void MainForm_Load(object sender, EventArgs e)
         {
             if (Properties.Settings.Default.MqttEnabled)
-            { HomeAssistantMqtt.Instance.Register(); }
+            { //HomeAssistantMqtt.Instance.Register();
+            }
 
         }
 
