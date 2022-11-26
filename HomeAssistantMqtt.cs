@@ -49,6 +49,19 @@ namespace Wellbeing
         }
 
         /// <summary>
+        /// Update Home assistant when closeing program, via mqtt
+        /// </summary>
+
+        public void Close()
+        {
+
+            //Sensor Data
+            MqttClient.Instance.Send($"wellbeing/{pcName}/{userName}/IDLE", "True", true);
+            
+
+        }
+
+        /// <summary>
         /// Update Home assistant via mqtt with total of the time spent active before goigle, aka slot
         /// </summary>
         /// <param name="total"></param>

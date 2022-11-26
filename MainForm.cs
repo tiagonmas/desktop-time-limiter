@@ -9,6 +9,7 @@ using System.Windows.Forms;
 using System.Globalization;
 using System.Resources;
 using System.Threading;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.TaskbarClock;
 
 namespace Wellbeing
 {
@@ -26,6 +27,9 @@ namespace Wellbeing
         private string? Password;
         private Button btnMqtt;
         private StatusStrip statusStrip1;
+        private Label lblSlot;
+        private Label label1;
+        private Label lblCurrentSlot;
         private static readonly List<(int timePointMins, Action action)> TimeEvents = new()
         {
             (30, () =>
@@ -72,8 +76,9 @@ namespace Wellbeing
                         Logger.Log("OnRunningChanged: " + running);
                     }
                 ));
+            PassedTimeWatcher.OnEnterIdle += PassedTimeWatcher_OnEnterIdle;
             PassedTimeWatcher.OnUpdate += (_, time) =>
-                Invoke(new EventHandler((_, _) => HandleTick(time.passedMillis, time.remainingMillis)));
+                Invoke(new EventHandler((_, _) => HandleTick(time.passedMillis, time.remainingMillis, time.CurrentSlotDuration)));
             PassedTimeWatcher.OnMaxTimeReached += (_, _) =>
                 Invoke(new EventHandler((_, _) => HandleMaxTimeReached()));
 
@@ -85,6 +90,12 @@ namespace Wellbeing
             Config.SetValue(Config.Property.LastOpenOrResetDateTime, DateTime.Now.ToString(DateTimeFormatter));
         }
 
+        private void PassedTimeWatcher_OnEnterIdle(object sender, TimeSpan slotDuration)
+        {
+            lblSlot.Text = "Last Slot:: " + Format(slotDuration);
+            lblCurrentSlot.Text = "Current Slot: 0";
+        }
+
         private static void UpdateHandler(Action update)
         {
             PassedTimeWatcher.SaveToConfig();
@@ -93,6 +104,7 @@ namespace Wellbeing
 
         protected override void OnHandleCreated(EventArgs e)
         {
+            Logger.Log("OnHandleCreated Running becomes true");
             if (ResetChecker.ShouldResetPassedTime())
                 Reset();
 
@@ -118,7 +130,7 @@ namespace Wellbeing
 
         private void Reset()
         {
-            Logger.Log("Resetting passed time.");
+            Logger.Log("Resetting passed time.",true);
             PassedTimeWatcher.PassedMillis = 0;
             UnlockIfLocked();
             Config.SetValue(Config.Property.PassedTodaySecs, "0");
@@ -141,7 +153,7 @@ namespace Wellbeing
             PcLocker.Lock();
         }
 
-        private void HandleTick(int passedMillis, int remainingMillis)
+        private void HandleTick(int passedMillis, int remainingMillis, TimeSpan currentSlotDuration)
         {
             if (Opacity != 0)
                 IdleLbl.Text = Utils.FormatTime(IdleTimeWatcher.IdleTimeMillis);
@@ -149,7 +161,8 @@ namespace Wellbeing
             TimeSpan remainingTime = TimeSpan.FromMilliseconds(remainingMillis);
             string formatted = Properties.Resources.Time+": " + Format(passedTime) + " / " + Format(PassedTimeWatcher.MaxTime);
             TimeLbl.Text = formatted;
-
+            lblCurrentSlot.Text = "Current Slot: " + Format(currentSlotDuration);
+            
             int remainingTimeMins = (int)remainingTime.TotalMinutes;
             if (LastShownMins < remainingTimeMins)
                 LastShownMins = int.MaxValue;
@@ -245,9 +258,12 @@ namespace Wellbeing
             }
             else
             {
+
                 PassedTimeWatcher.SaveToConfig();
                 Logger.Log($"Closing program. Reason: {e.CloseReason}");
             }
+
+            HomeAssistantMqtt.Instance.Close();
             base.OnFormClosing(e);
         }
 
@@ -383,7 +399,7 @@ namespace Wellbeing
         {
             Logger.Log($"DUMP:\n" +
            $"  Idle time during sleep: {Utils.FormatTime(PassedTimeWatcher.IdleMillisDuringSleep)}\n" +
-           $"  Last idle time: {Utils.FormatTime(PassedTimeWatcher.LastIdleTimeMillis)}\n");
+           $"  Last idle time: {Utils.FormatTime(PassedTimeWatcher.LastIdleTimeMillis)}\n", true);
         }
 
         #region Windows Form Designer generated code
@@ -406,6 +422,9 @@ namespace Wellbeing
             this.IdleLbl = new System.Windows.Forms.Label();
             this.btnMqtt = new System.Windows.Forms.Button();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
+            this.lblSlot = new System.Windows.Forms.Label();
+            this.label1 = new System.Windows.Forms.Label();
+            this.lblCurrentSlot = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // TimeLbl
@@ -465,12 +484,13 @@ namespace Wellbeing
             // StatusLbl
             // 
             this.StatusLbl.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.StatusLbl.Location = new System.Drawing.Point(12, 82);
+            this.StatusLbl.Location = new System.Drawing.Point(85, 82);
             this.StatusLbl.Name = "StatusLbl";
             this.StatusLbl.Size = new System.Drawing.Size(144, 23);
             this.StatusLbl.TabIndex = 0;
             this.StatusLbl.Text = "Status";
             this.StatusLbl.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.StatusLbl.Click += new System.EventHandler(this.StatusLbl_Click);
             // 
             // ChangePasswordButt
             // 
@@ -552,7 +572,7 @@ namespace Wellbeing
             // RestartButt
             // 
             this.RestartButt.Font = new System.Drawing.Font("Microsoft YaHei UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.RestartButt.Location = new System.Drawing.Point(232, 406);
+            this.RestartButt.Location = new System.Drawing.Point(232, 397);
             this.RestartButt.Name = "RestartButt";
             this.RestartButt.Size = new System.Drawing.Size(171, 58);
             this.RestartButt.TabIndex = 12;
@@ -588,11 +608,44 @@ namespace Wellbeing
             this.statusStrip1.TabIndex = 16;
             this.statusStrip1.Text = "statusStrip1";
             // 
+            // lblSlot
+            // 
+            this.lblSlot.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
+            this.lblSlot.Location = new System.Drawing.Point(12, 121);
+            this.lblSlot.Name = "lblSlot";
+            this.lblSlot.Size = new System.Drawing.Size(176, 23);
+            this.lblSlot.TabIndex = 17;
+            this.lblSlot.Text = "LastSlot";
+            this.lblSlot.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F);
+            this.label1.Location = new System.Drawing.Point(13, 82);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(60, 20);
+            this.label1.TabIndex = 18;
+            this.label1.Text = "Status:";
+            // 
+            // lblCurrentSlot
+            // 
+            this.lblCurrentSlot.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
+            this.lblCurrentSlot.Location = new System.Drawing.Point(228, 121);
+            this.lblCurrentSlot.Name = "lblCurrentSlot";
+            this.lblCurrentSlot.Size = new System.Drawing.Size(176, 23);
+            this.lblCurrentSlot.TabIndex = 19;
+            this.lblCurrentSlot.Text = "CurrentSlot";
+            this.lblCurrentSlot.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(439, 537);
+            this.Controls.Add(this.lblCurrentSlot);
+            this.Controls.Add(this.label1);
+            this.Controls.Add(this.lblSlot);
             this.Controls.Add(this.statusStrip1);
             this.Controls.Add(this.btnMqtt);
             this.Controls.Add(this.IdleLbl);
@@ -666,6 +719,11 @@ namespace Wellbeing
         }
 
         private void aboutToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void StatusLbl_Click(object sender, EventArgs e)
         {
 
         }
