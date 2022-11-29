@@ -34,6 +34,7 @@ namespace Wellbeing
                 // If date is before 3:00am (00:00 - 2:59), next 3:00am is today's 3:00am.
                 // Otherwise it's the next 3:00am is the next day, so we add 1 day to today's 3am.
                 NextResetTime = TimePoint <= timePointDayResetHour ? timePointDayResetHour : timePointDayResetHour.AddDays(1);
+                Logger.Log("New NextResetTime:" + NextResetTime.ToString());
                 //PreviousResetHour = LastOpen <= lastOpenDayResetHour ? lastOpenDayResetHour.AddDays(-1) : lastOpenDayResetHour;
             }
         }
@@ -56,10 +57,14 @@ namespace Wellbeing
 
         private void HandleTick(object obj, ElapsedEventArgs e)
         {
-            Logger.Log("Checking if should reset passed time...", false);
             if (!ShouldResetPassedTime())
+            {
                 return;
+            }
+            else
+            { Logger.Log("Checking if should reset passed time...Yes", true); }
             
+
             TimePoint = DateTime.Now.Add(TimeSpan.FromMinutes(1));
             ShouldResetHandler?.Invoke(this, EventArgs.Empty);
         }

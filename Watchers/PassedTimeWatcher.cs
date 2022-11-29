@@ -29,6 +29,7 @@ namespace Wellbeing
         private static bool _locked=false;
         internal static DateTime _slotStart=DateTime.Now;
         internal static TimeSpan _slotDuration= new TimeSpan(0);
+        internal static TimeSpan _currentSlotDuration;
         public static bool Running
         {
             get => _Running;
@@ -101,7 +102,7 @@ namespace Wellbeing
             idleTimeMillis -= IdleMillisDuringSleep;
 
 
-            TimeSpan _currentSlotDuration;
+            
             if (idleTimeMillis >= IdleThreshold.TotalMilliseconds)
             { 
                 HandleIdleTick(idleTimeMillis, _slotDuration);
@@ -110,8 +111,11 @@ namespace Wellbeing
             }
             else
             {
-                _currentSlotDuration = DateTime.Now.Subtract(_slotStart);
-                _slotDuration = DateTime.Now.Subtract(_slotStart);
+                if (!Idle)
+                {
+                    _currentSlotDuration = DateTime.Now.Subtract(_slotStart);
+                    _slotDuration = DateTime.Now.Subtract(_slotStart);
+                }
                 HandleTick(idleTimeMillis);
                 //Logger.Log("HandleTick " + idleTimeMillis, true);
             }
